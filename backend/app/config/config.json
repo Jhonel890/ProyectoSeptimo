@@ -1,0 +1,12 @@
+{
+    "development": {
+    "username": "jhone",
+    "password": "Sanduche333!",
+    "database": "tiempo",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": "3306",
+    "charset": "utf8"
+    }
+
+}
