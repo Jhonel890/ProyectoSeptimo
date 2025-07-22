@@ -8,8 +8,20 @@ module.exports = (sequelize, DataTypes) => {
       apellidos: { type: DataTypes.STRING(150), allowNull: false },
       direccion: { type: DataTypes.STRING(300), allowNull: true },
       cedula: { type: DataTypes.STRING(15), allowNull: false },
-      monedas: { type: DataTypes.DOUBLE, defaultValue: 0 },
-      descripcion: { type: DataTypes.STRING(500), allowNull: true },
+      estado: {
+        type: DataTypes.ENUM("Activo", "Inactivo"),
+        allowNull: false,
+        defaultValue: "Activo", 
+      },
+      rol_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "rol",
+          key: "id",
+        },
+      },
+      num_telefono: { type: DataTypes.STRING(15), allowNull: true },
       external_id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
     },
     {
@@ -19,28 +31,49 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   persona.associate = function (models) {
+    // Relación 1 a 1 con rol
+    persona.belongsTo(models.rol, {
+      foreignKey: "rol_id",
+      as: "rol",
+    });
+    
+
+    // Relación 1 a 1 con cuenta
     persona.hasOne(models.cuenta, {
-      foreignKey: "id_persona",
+      foreignKey: "id_persona", 
       as: "cuenta",
     });
-    persona.belongsTo(models.rol, {
-      foreignKey: "id_rol",
+
+    // Relación 1 a muchos con puntaje
+    persona.hasMany(models.puntuacion, {
+      foreignKey: "id_persona", 
+      as: "puntajes",
     });
 
-    persona.hasMany(models.inquietud, {
-      foreignKey: "id_persona",
-      as: "inquietudes",
+    // Relación 1 a muchos con oficio (a través de una tabla intermedia)
+    persona.belongsToMany(models.oficio, {
+      through: "persona_oficio", 
+      foreignKey: "id_persona", 
+      otherKey: "id_oficio", 
+      as: "oficios",
     });
 
-    persona.hasMany(models.respuesta, {
-      foreignKey: "id_persona",
-      as: "respuestas",
+    // Relación 1 a muchos con trabajo
+    persona.hasMany(models.trabajo, {
+      foreignKey: "id_persona", 
+      as: "trabajos",
     });
 
-    persona.belongsToMany(models.perfil, {
-      through: "persona_perfil",
-      foreignKey: "id_persona",
-      as: "perfiles",
+    // Relación 1 a muchos con oferta
+    persona.hasMany(models.oferta, {
+      foreignKey: "id_persona", 
+      as: "ofertas",
+    });
+
+    // Relación 1 a 1 con contrato
+    persona.hasOne(models.contrato, {
+      foreignKey: "id_persona", 
+      as: "contrato",
     });
   };
 

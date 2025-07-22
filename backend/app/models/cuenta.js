@@ -7,9 +7,11 @@ module.exports = (sequelize, DataTypes) => {
         estado: {type:DataTypes.BOOLEAN,defaultValue:true},
         external_id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 }
     }, { freezeTableName: true, timestamps: true });
-    cuenta.associate=function(models){
-        cuenta.belongsTo(models.persona,{
-            foreignKey:'id_persona'});
-    };
+
+    cuenta.associate = function (models) {
+        cuenta.belongsTo(models.persona, {
+            foreignKey: "id_persona",
+            as: "persona",
+        });}    
     return cuenta;
 };

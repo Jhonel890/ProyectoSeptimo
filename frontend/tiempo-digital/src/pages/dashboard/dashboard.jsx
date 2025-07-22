@@ -43,14 +43,6 @@ const PreguntasPage = () => {
             style={styles.input}
           />
           <div style={styles.profileContainer}>
-            <span style={styles.notificationBadge}>{monedas}</span>
-            <img
-              src="https://img.freepik.com/vector-premium/dibujo-dibujos-animados-pila-monedas-oro-signo-dolar-el_761413-4292.jpg"
-              alt="Monedas"
-              style={{ width: "60px", height: "60px", borderRadius: "50%" }}
-            />
-            
-            <span style={styles.profileName}><Link to="/perfil" style={{ textDecoration: 'none', color: 'inherit' }}>{user.nombres} {user.apellidos}</Link></span>
             <div style={styles.profileAvatar}>
               <img
                 src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png"
@@ -62,7 +54,7 @@ const PreguntasPage = () => {
         </div>
 
         {/* Preguntas Section */}
-        <h1 style={styles.sectionTitle}>Preguntas de acuerdo a tu perfil</h1>
+        <h1 style={styles.sectionTitle}>Trabajo de acuerdo a tu(s) oficios</h1>
         <div style={styles.gridContainer}>
           {preguntas.map((pregunta, index) => (
             <div key={index} style={styles.card}>

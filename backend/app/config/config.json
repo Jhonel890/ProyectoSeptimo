@@ -1,8 +1,8 @@
 {
     "development": {
-    "username": "jhone",
+    "username": "root",
     "password": "Sanduche333!",
-    "database": "tiempo",
+    "database": "oficio",
     "host": "localhost",
     "dialect": "mysql",
     "port": "3306",

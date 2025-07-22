@@ -39,17 +39,24 @@ class RolControl {
         try {
             const safeBody = rolSchema.safeParse(req.body);
             if (safeBody.error) {
-                res.status(400).json({ message: safeBody.error, tag: "Datos incorrectos", code: 400 });
-            } else {
-                const data = safeBody.data;
-                const result = await Rol.create(data);
-                if (!result) {
-                    res.status(401).json({ message: "ERROR", tag: "No se puede crear", code: 401 });
-                } else {
-                    res.status(200).json({ message: "EXITO", code: 200 });
-                }
+                return res.status(400).json({ message: safeBody.error, tag: "Datos incorrectos", code: 400 });
             }
-
+    
+            const data = safeBody.data;
+    
+            // Verificar si ya existe un rol con el mismo nombre
+            const existingRol = await Rol.findOne({ where: { nombre: data.nombre } });
+            if (existingRol) {
+                return res.status(400).json({ message: "El rol ya existe", tag: "Duplicado", code: 400 });
+            }
+    
+            // Crear el nuevo rol
+            const result = await Rol.create(data);
+            if (!result) {
+                return res.status(401).json({ message: "ERROR", tag: "No se puede crear", code: 401 });
+            }
+    
+            res.status(200).json({ message: "ÉXITO", code: 200 });
         } catch (error) {
             res.status(500).json({ message: "Error interno del servidor", code: 500, error: error.message });
         }

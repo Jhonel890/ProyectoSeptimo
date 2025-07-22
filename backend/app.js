@@ -7,9 +7,7 @@ const cors = require('cors');
 const routerCuenta = require('./routes/cuenta');
 const routerPersona = require('./routes/persona');
 const routerRol = require('./routes/rol');
-const routerInquietud = require('./routes/inquietud');
-const routerRespuesta = require('./routes/respuesta');
-const routerPerfil = require('./routes/perfil');
+const routerOficio = require('./routes/oficio'); 
 var app = express();
 app.use(cors({ origin: '*' })); 
 
@@ -22,14 +20,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/cuenta', routerCuenta);
 app.use('/persona', routerPersona);
 app.use('/rol', routerRol);
-app.use('/inquietud', routerInquietud);
-app.use('/respuesta', routerRespuesta);
-app.use('/perfil', routerPerfil);
+app.use('/oficio', routerOficio);
+
 
 console.log("Ruta de modelos:", path.resolve(__dirname, 'app', 'models'));
 let models = require('./app/models');
-models.sequelize.sync({ force: false, logging: false }).then(() => {
+models.sequelize.sync({ force: true, logging: false }).then(() => {
   console.log("Se ha sincronizado la base de datos");
+  console.log("Puerto del servidor: ", process.env.PORT || 3000);
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Servidor escuchando en el puerto: ", process.env.PORT || 3000);
+  });
 }).catch(err => {
   console.log(err, 'Hubo un error al sincronizar la base de datos');
 });
