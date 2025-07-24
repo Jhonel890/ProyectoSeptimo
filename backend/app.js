@@ -8,6 +8,7 @@ const routerCuenta = require('./routes/cuenta');
 const routerPersona = require('./routes/persona');
 const routerRol = require('./routes/rol');
 const routerOficio = require('./routes/oficio'); 
+const routerTrabajo = require('./routes/trabajo'); 
 var app = express();
 app.use(cors({ origin: '*' })); 
 
@@ -21,11 +22,12 @@ app.use('/cuenta', routerCuenta);
 app.use('/persona', routerPersona);
 app.use('/rol', routerRol);
 app.use('/oficio', routerOficio);
+app.use('/trabajo', routerTrabajo);
 
 
 console.log("Ruta de modelos:", path.resolve(__dirname, 'app', 'models'));
 let models = require('./app/models');
-models.sequelize.sync({ force: true, logging: false }).then(() => {
+models.sequelize.sync({ force: false, logging: false }).then(() => {
   console.log("Se ha sincronizado la base de datos");
   console.log("Puerto del servidor: ", process.env.PORT || 3000);
   app.listen(process.env.PORT || 3000, () => {

@@ -15,29 +15,32 @@ module.exports = (sequelize, DataTypes) => {
     }, { freezeTableName: true, timestamps: true });
 
     trabajo.associate = function (models) {
+        // Relación de muchos a muchos con oficio
+        trabajo.belongsToMany(models.oficio, {
+            through: 'trabajo_oficio', // Nombre de la tabla intermedia
+            foreignKey: 'id_trabajo',
+            otherKey: 'id_oficio',
+            as: 'oficios', // Alias para la relación
+        });
+    
         // Relación de muchos a uno con persona
         trabajo.belongsTo(models.persona, {
             foreignKey: 'id_persona',
             as: 'persona',
         });
-
+    
         // Relación de 1 a 1 con contrato
         trabajo.hasOne(models.contrato, {
-            foreignKey: 'id_trabajo', 
+            foreignKey: 'id_trabajo',
             as: 'contrato',
         });
-
+    
         // Relación de 1 a 1 con oferta
         trabajo.hasOne(models.oferta, {
-            foreignKey: 'id_trabajo', 
+            foreignKey: 'id_trabajo',
             as: 'oferta',
         });
-
-        // Relación de 1 a muchos con oficio
-        trabajo.belongsTo(models.oficio, {
-            foreignKey: 'id_oficio', 
-            as: 'oficio',
-        });
+    
     };
 
     return trabajo;

@@ -34,7 +34,12 @@ export default function Login() {
         confirmButtonText: "Aceptar",
       });
       setAll(response.data.token, response.data.usuario, response.data.rol, response.data.external_id);
-      Router("/principal");
+      console.log(response.data);
+      if (response.data.rol === "trabajador") {
+        Router("/principal");
+      }else if (response.data.rol === "contratista") {
+        Router("/contratista");
+      } 
     } else {
       Alerta({
         title: "Error",

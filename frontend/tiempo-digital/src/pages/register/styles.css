@@ -1,122 +1,153 @@
-/* Añadir estilo para dos columnas */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  width: 100%;
-}
-
-.form-grid div {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Mantener estilos generales */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-}
-
-.login {
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 20px;
 }
 
-.login-container {
-  display: flex;
-  height: 80%;
-  width: 80%;
-  background-color: #fff;
-  overflow: hidden;
-  border-radius: 8px;
-}
-
-.login-form {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-}
-
-.login-form h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.login-form form {
+.auth-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 40px;
   width: 100%;
   max-width: 600px;
 }
 
-.login-form label {
-  margin-bottom: 0.5rem;
-  color: #555;
-  font-weight: bold;
+.auth-title {
+  color: #2c3e50;
+  font-size: 28px;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
-.login-form input {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.error {
-  color: red;
-  font-size: 0.8rem;
-  margin-bottom: 1rem;
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.btn-register {
-  background-color: #28a745;
-  color: #fff;
-  padding: 0.75rem;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-input {
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.form-input.error {
+  border-color: #e74c3c;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.role-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-radio {
+  position: absolute;
+  opacity: 0;
+}
+
+.role-card {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: all 0.3s;
+  height: 100%;
+}
+
+.role-option:hover .role-card {
+  border-color: #3498db;
+}
+
+.role-radio:checked + .role-card {
+  border-color: #3498db;
+  background-color: #f8fafc;
+  box-shadow: 0 0 0 1px #3498db;
+}
+
+.role-title {
+  text-transform: capitalize; /* Capitaliza la primera letra de cada palabra */
+  font-size: 18px; /* Ajusta el tamaño de la fuente si es necesario */
+  font-weight: bold; /* Opcional: hace el texto más destacado */
+}
+
+.role-description {
+  font-size: 13px;
+  color: #7f8c8d;
+  display: block;
+}
+
+.auth-button {
+  background-color: #3498db;
+  color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: bold;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s;
+  margin-top: 10px;
 }
 
-.btn-register:hover {
-  background-color: #1c7c31;
+.auth-button:hover {
+  background-color: #2980b9;
 }
 
-.link {
-  color: #0056d2;
+.auth-link {
+  text-align: center;
+  color: #7f8c8d;
+  margin-top: 20px;
+}
+
+.auth-link span {
+  color: #3498db;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.auth-link span:hover {
   text-decoration: underline;
 }
 
-.login-image {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-image img {
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-@media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
-  }
-
-  .login-image {
-    display: none;
-  }
+.role-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
 }

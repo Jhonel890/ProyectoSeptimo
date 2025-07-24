@@ -1,4 +1,4 @@
-export const URL_API = "http://localhost:3007";
+export const URL_API = "http://localhost:3000";
 
 export async function GET(url, token){
     return fetch(URL_API+url, {
@@ -15,7 +15,7 @@ export async function POST(url, data, token = ''){
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+           // "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(data),
     }).then((response) => response.json());

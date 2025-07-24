@@ -15,16 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         estado :   { type: DataTypes.BOOLEAN, defaultValue: true },
         external_id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
     }, { freezeTableName: true, timestamps: true });
-
-
-    
-    contrato.associate = function (models) {
-        // Relación 1 a 1 con pago
-        contrato.hasOne(models.pago, {
-          foreignKey: "contratoId", 
-          as: "pago",
-        });
-      };
     
     return contrato;
 };
