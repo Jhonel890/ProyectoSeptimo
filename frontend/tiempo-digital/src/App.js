@@ -6,6 +6,8 @@ import NotFound from './pages/notfound';
 import Register from './pages/register/register';
 import DashboardContratista from './pages/dashboardContratista/dashboardContratista';
 import CrearPreguntas from './pages/crearTrabajo/crearTrabajo';
+import PostulacionesPage from "./pages/postulaciones/postulcionesPages";
+import OfertasPersona from './pages/ofertasPersona/ofertasPersona';
 
 const App = () => {
   return (
@@ -17,6 +19,9 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
         <Route path="/contratista" element={<DashboardContratista />} />
         <Route path="/crearPregunta" element={<CrearPreguntas />} />
+        <Route path="/trabajo/postulaciones/:id" element={<PostulacionesPage />} />
+        <Route path="/ofertasPersona" element={<OfertasPersona />} />
+
         
       </Routes>
     </Router>

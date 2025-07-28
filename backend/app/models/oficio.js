@@ -17,9 +17,11 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         // Relación: un oficio es usado por muchos trabajos
-        oficio.hasMany(models.trabajo, {
-            foreignKey: 'id_oficio', 
-            as: 'trabajos',
+        oficio.belongsToMany(models.trabajo, {
+            through: 'trabajo_oficio',
+            foreignKey: 'id_oficio',
+            otherKey: 'id_trabajo',
+            as: 'trabajos' // ¡Este alias debe coincidir con el usado en el include!
         });
     };
 

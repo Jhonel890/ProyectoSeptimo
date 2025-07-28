@@ -1,145 +1,142 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { Alerta } from "../../utils/mensajes";
+import { POST } from "../../utils/methods";
+import useGetOficios from "../../hooks/useGetOficios";
+import useGetUser from "../../hooks/useGetUser";
 import "./crearTrabajo.css";
 
 const CrearTrabajoPage = ({ onClose }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
-  
-  // Estado del formulario
-  const [formData, setFormData] = useState({
-    id_persona: 1, // Este vendría del contexto de usuario autenticado
-    titulo_trabajo: '',
-    descripcion: '',
-    fecha_inicio: '',
-    fecha_fin: '',
-    estado: 'Postulado',
-    oficios: []
+  const user = useGetUser();
+
+  console.log("Usuario actual:", user);
+  const { oficios: oficiosDisponibles, loading: loadingOficios, error: oficiosError } = useGetOficios();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [serverError, setServerError] = React.useState(null);
+
+  const schema = yup.object().shape({
+    titulo_trabajo: yup.string()
+      .required("El título es obligatorio")
+      .max(100, "Máximo 100 caracteres"),
+    descripcion: yup.string()
+      .required("La descripción es obligatoria")
+      .max(500, "Máximo 500 caracteres"),
+    fecha_inicio: yup.date()
+      .required("La fecha de inicio es obligatoria")
+      .min(new Date(), "La fecha no puede ser en el pasado"),
+    fecha_fin: yup.date()
+      .required("La fecha de fin es obligatoria")
+      .when('fecha_inicio', (fecha_inicio, schema) => {
+        return fecha_inicio && schema.min(fecha_inicio, "La fecha de fin debe ser posterior a la de inicio");
+      }),
+    oficios: yup.array()
+      .min(1, "Selecciona al menos un oficio")
+      .required("Debes seleccionar al menos un oficio")
   });
 
-  // Lista de oficios disponibles (esto vendría de una API)
-  const [oficiosDisponibles] = useState([
-    { id: 1, nombre: 'Carpintero', icon: '🔨' },
-    { id: 2, nombre: 'Plomero', icon: '🔧' },
-    { id: 3, nombre: 'Electricista', icon: '⚡' },
-    { id: 4, nombre: 'Pintor', icon: '🎨' },
-    { id: 5, nombre: 'Albañil', icon: '🧱' },
-    { id: 6, nombre: 'Jardinero', icon: '🌱' },
-    { id: 7, nombre: 'Mecánico', icon: '🔧' },
-    { id: 8, nombre: 'Soldador', icon: '🔥' }
-  ]);
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors }, 
+    setValue,
+    watch,
+    reset
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      estado: 'Postulado',
+      oficios: []
+    }
+  });
 
-  const [errores, setErrores] = useState({});
+  const selectedOficios = watch("oficios");
 
-  // Manejar cambios en inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const onSubmit = async (formData) => {
+    setIsSubmitting(true);
+    setServerError(null);
     
-    // Limpiar error del campo si existe
-    if (errores[name]) {
-      setErrores(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  // Manejar selección de oficios
-  const handleOficioToggle = (oficioId) => {
-    setFormData(prev => ({
-      ...prev,
-      oficios: prev.oficios.includes(oficioId)
-        ? prev.oficios.filter(id => id !== oficioId)
-        : [...prev.oficios, oficioId]
-    }));
-  };
-
-  // Validar formulario
-  const validarFormulario = () => {
-    const nuevosErrores = {};
-
-    if (!formData.titulo_trabajo.trim()) {
-      nuevosErrores.titulo_trabajo = 'El título es obligatorio';
-    }
-
-    if (!formData.descripcion.trim()) {
-      nuevosErrores.descripcion = 'La descripción es obligatoria';
-    }
-
-    if (!formData.fecha_inicio) {
-      nuevosErrores.fecha_inicio = 'La fecha de inicio es obligatoria';
-    }
-
-    if (!formData.fecha_fin) {
-      nuevosErrores.fecha_fin = 'La fecha de fin es obligatoria';
-    }
-
-    if (formData.fecha_inicio && formData.fecha_fin) {
-      if (new Date(formData.fecha_inicio) >= new Date(formData.fecha_fin)) {
-        nuevosErrores.fecha_fin = 'La fecha de fin debe ser posterior a la fecha de inicio';
-      }
-    }
-
-    if (formData.oficios.length === 0) {
-      nuevosErrores.oficios = 'Selecciona al menos un oficio';
-    }
-
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  };
-
-  // Enviar formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validarFormulario()) {
-      return;
-    }
-
-    setLoading(true);
-    setMensaje({ tipo: '', texto: '' });
-
     try {
-      // Simular llamada API
-      const response = await fetch('/api/trabajos/guardar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      if (!user?.id) {
+        throw new Error("No se pudo identificar al usuario");
+      }
 
-      const result = await response.json();
+      const trabajoData = {
+        id_persona: user.id,
+        ...formData
+      };
 
-  if (response.ok) {
-    setMensaje({ tipo: 'success', texto: 'Trabajo creado exitosamente' });
-    setTimeout(() => {
-      if (onClose) onClose();
-    }, 2000);
-      } else {
-        setMensaje({ 
-          tipo: 'error', 
-          texto: result.message || 'Error al crear el trabajo' 
+      const response = await POST('/trabajo', trabajoData);
+
+      if (response.message) {
+        Alerta({
+          title: "¡Trabajo creado!",
+          text: response.message,
+          icon: "success",
+          willClose: () => {
+            reset();
+            if (onClose) onClose();
+            else navigate('/trabajos');
+          }
         });
+      } else {
+        throw new Error(response.error || "Error al crear el trabajo");
       }
     } catch (error) {
-      setMensaje({ 
-        tipo: 'error', 
-        texto: 'Error de conexión. Inténtalo de nuevo.' 
+      console.error("Error al crear trabajo:", error);
+      setServerError(error.message);
+      Alerta({
+        title: "Error",
+        text: error.message,
+        icon: "error"
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const handleOficioToggle = (oficioId) => {
+    const newOficios = selectedOficios.includes(oficioId)
+      ? selectedOficios.filter(id => id !== oficioId)
+      : [...selectedOficios, oficioId];
+    setValue("oficios", newOficios);
   };
 
   const handleVolver = () => {
-    navigate('/');
+    if (onClose) onClose();
+    else navigate(-1);
   };
+
+  if (loadingOficios) {
+    return (
+      <div className="crear-trabajo-container">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Cargando oficios disponibles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (oficiosError) {
+    return (
+      <div className="crear-trabajo-container">
+        <div className="error-container">
+          <h2>Error al cargar oficios</h2>
+          <p className="error-message">{oficiosError}</p>
+          <button 
+            className="btn-primary"
+            onClick={() => window.location.reload()}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="crear-trabajo-container">
@@ -149,20 +146,17 @@ const CrearTrabajoPage = ({ onClose }) => {
           Crear Nuevo Trabajo
         </h1>
         <p className="page-subtitle">
-          Describe el trabajo que necesitas realizar y selecciona los oficios requeridos
+          Completa los detalles del trabajo que necesitas realizar
         </p>
       </div>
 
-      {mensaje.texto && (
-        <div className={`mensaje ${mensaje.tipo}`}>
-          <span className="mensaje-icon">
-            {mensaje.tipo === 'success' ? '✅' : '❌'}
-          </span>
-          {mensaje.texto}
+      {serverError && (
+        <div className="server-error">
+          <p>{serverError}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="crear-trabajo-form">
+      <form onSubmit={handleSubmit(onSubmit)} className="crear-trabajo-form">
         {/* Información básica */}
         <div className="form-section">
           <h2 className="section-title">
@@ -170,47 +164,33 @@ const CrearTrabajoPage = ({ onClose }) => {
             Información del Trabajo
           </h2>
           
-          <div className="form-grid">
-            <div className="form-group full-width">
-              <label htmlFor="titulo_trabajo" className="form-label">
-                Título del Trabajo *
-              </label>
-              <input
-                type="text"
-                id="titulo_trabajo"
-                name="titulo_trabajo"
-                value={formData.titulo_trabajo}
-                onChange={handleInputChange}
-                className={`form-input ${errores.titulo_trabajo ? 'error' : ''}`}
-                placeholder="Ej: Reparación de tubería en cocina"
-                maxLength="100"
-              />
-              {errores.titulo_trabajo && (
-                <span className="error-message">{errores.titulo_trabajo}</span>
-              )}
-            </div>
+          <div className="form-group">
+            <label htmlFor="titulo_trabajo">Título del Trabajo *</label>
+            <input
+              id="titulo_trabajo"
+              {...register("titulo_trabajo")}
+              className={`form-input ${errors.titulo_trabajo ? 'error' : ''}`}
+              placeholder="Ej: Reparación de tuberías en cocina"
+              disabled={isSubmitting}
+            />
+            {errors.titulo_trabajo && (
+              <span className="error-message">{errors.titulo_trabajo.message}</span>
+            )}
+          </div>
 
-            <div className="form-group full-width">
-              <label htmlFor="descripcion" className="form-label">
-                Descripción Detallada *
-              </label>
-              <textarea
-                id="descripcion"
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleInputChange}
-                className={`form-textarea ${errores.descripcion ? 'error' : ''}`}
-                placeholder="Describe detalladamente el trabajo que necesitas, materiales, ubicación, etc."
-                rows="5"
-                maxLength="500"
-              />
-              <div className="char-count">
-                {formData.descripcion.length}/500 caracteres
-              </div>
-              {errores.descripcion && (
-                <span className="error-message">{errores.descripcion}</span>
-              )}
-            </div>
+          <div className="form-group">
+            <label htmlFor="descripcion">Descripción *</label>
+            <textarea
+              id="descripcion"
+              {...register("descripcion")}
+              className={`form-textarea ${errors.descripcion ? 'error' : ''}`}
+              placeholder="Describe en detalle el trabajo a realizar..."
+              rows={5}
+              disabled={isSubmitting}
+            />
+            {errors.descripcion && (
+              <span className="error-message">{errors.descripcion.message}</span>
+            )}
           </div>
         </div>
 
@@ -218,61 +198,38 @@ const CrearTrabajoPage = ({ onClose }) => {
         <div className="form-section">
           <h2 className="section-title">
             <span className="section-icon">📅</span>
-            Cronograma
+            Fechas Estimadas
           </h2>
           
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor="fecha_inicio" className="form-label">
-                Fecha de Inicio *
-              </label>
+              <label htmlFor="fecha_inicio">Fecha de Inicio *</label>
               <input
                 type="date"
                 id="fecha_inicio"
-                name="fecha_inicio"
-                value={formData.fecha_inicio}
-                onChange={handleInputChange}
-                className={`form-input ${errores.fecha_inicio ? 'error' : ''}`}
+                {...register("fecha_inicio")}
+                className={`form-input ${errors.fecha_inicio ? 'error' : ''}`}
+                disabled={isSubmitting}
                 min={new Date().toISOString().split('T')[0]}
               />
-              {errores.fecha_inicio && (
-                <span className="error-message">{errores.fecha_inicio}</span>
+              {errors.fecha_inicio && (
+                <span className="error-message">{errors.fecha_inicio.message}</span>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="fecha_fin" className="form-label">
-                Fecha de Finalización *
-              </label>
+              <label htmlFor="fecha_fin">Fecha de Fin *</label>
               <input
                 type="date"
                 id="fecha_fin"
-                name="fecha_fin"
-                value={formData.fecha_fin}
-                onChange={handleInputChange}
-                className={`form-input ${errores.fecha_fin ? 'error' : ''}`}
-                min={formData.fecha_inicio || new Date().toISOString().split('T')[0]}
+                {...register("fecha_fin")}
+                className={`form-input ${errors.fecha_fin ? 'error' : ''}`}
+                disabled={isSubmitting}
+                min={watch("fecha_inicio") || new Date().toISOString().split('T')[0]}
               />
-              {errores.fecha_fin && (
-                <span className="error-message">{errores.fecha_fin}</span>
+              {errors.fecha_fin && (
+                <span className="error-message">{errors.fecha_fin.message}</span>
               )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="estado" className="form-label">
-                Estado Inicial
-              </label>
-              <select
-                id="estado"
-                name="estado"
-                value={formData.estado}
-                onChange={handleInputChange}
-                className="form-select"
-              >
-                <option value="Postulado">Postulado</option>
-                <option value="En Revisión">En Revisión</option>
-                <option value="Programado">Programado</option>
-              </select>
             </div>
           </div>
         </div>
@@ -283,36 +240,30 @@ const CrearTrabajoPage = ({ onClose }) => {
             <span className="section-icon">🔨</span>
             Oficios Requeridos *
           </h2>
-          <p className="section-description">
-            Selecciona todos los oficios que necesitas para este trabajo
-          </p>
           
           <div className="oficios-grid">
             {oficiosDisponibles.map(oficio => (
               <div
                 key={oficio.id}
-                className={`oficio-card ${formData.oficios.includes(oficio.id) ? 'selected' : ''}`}
-                onClick={() => handleOficioToggle(oficio.id)}
+                className={`oficio-card ${selectedOficios.includes(oficio.id) ? 'selected' : ''}`}
+                onClick={() => !isSubmitting && handleOficioToggle(oficio.id)}
               >
-                <span className="oficio-icon">{oficio.icon}</span>
+                <span className="oficio-icon">{oficio.icon || '🛠️'}</span>
                 <span className="oficio-nombre">{oficio.nombre}</span>
-                {formData.oficios.includes(oficio.id) && (
-                  <span className="selected-indicator">✓</span>
+                {selectedOficios.includes(oficio.id) && (
+                  <span className="selected-check">✓</span>
                 )}
               </div>
             ))}
           </div>
           
-          {errores.oficios && (
-            <span className="error-message">{errores.oficios}</span>
-          )}
-          
-          {formData.oficios.length > 0 && (
-            <div className="oficios-seleccionados">
-              <p>Oficios seleccionados: {formData.oficios.length}</p>
-            </div>
+          {errors.oficios && (
+            <span className="error-message">{errors.oficios.message}</span>
           )}
         </div>
+
+        {/* Estado (oculto) */}
+        <input type="hidden" {...register("estado")} />
 
         {/* Botones */}
         <div className="form-actions">
@@ -320,26 +271,21 @@ const CrearTrabajoPage = ({ onClose }) => {
             type="button"
             onClick={handleVolver}
             className="btn-secondary"
-            disabled={loading}
+            disabled={isSubmitting}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="btn-primary"
-            disabled={loading}
+            className={`btn-primary ${isSubmitting ? 'submitting' : ''}`}
+            disabled={isSubmitting}
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
                 <span className="spinner"></span>
                 Creando...
               </>
-            ) : (
-              <>
-                <span>Crear Trabajo</span>
-                <span>💼</span>
-              </>
-            )}
+            ) : 'Crear Trabajo'}
           </button>
         </div>
       </form>

@@ -8,7 +8,9 @@ const routerCuenta = require('./routes/cuenta');
 const routerPersona = require('./routes/persona');
 const routerRol = require('./routes/rol');
 const routerOficio = require('./routes/oficio'); 
-const routerTrabajo = require('./routes/trabajo'); 
+const routerTrabajo = require('./routes/trabajo');
+const routerOferta = require('./routes/oferta');
+
 var app = express();
 app.use(cors({ origin: '*' })); 
 
@@ -23,6 +25,7 @@ app.use('/persona', routerPersona);
 app.use('/rol', routerRol);
 app.use('/oficio', routerOficio);
 app.use('/trabajo', routerTrabajo);
+app.use('/oferta', routerOferta);
 
 
 console.log("Ruta de modelos:", path.resolve(__dirname, 'app', 'models'));

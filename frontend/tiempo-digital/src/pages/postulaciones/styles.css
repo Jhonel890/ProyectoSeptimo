@@ -1,0 +1,170 @@
+.postulaciones-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+  }
+  
+  .postulaciones-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .postulaciones-header h1 {
+    font-weight: 700;
+    font-size: 2.25rem;
+  }
+  
+  .highlight {
+    color: #2563eb; /* azul bonito */
+  }
+  
+  .postulaciones-header p {
+    font-size: 1.125rem;
+    color: #555;
+  }
+  
+  .postulaciones-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .postulacion-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease-in-out;
+  }
+  
+  .postulacion-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+  
+  .postulacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .postulacion-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111;
+  }
+  
+  .estado-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    text-transform: capitalize;
+  }
+  
+  .estado-postulado {
+    background-color: #f59e0b; /* amarillo */
+  }
+  
+  .estado-activo {
+    background-color: #10b981; /* verde */
+  }
+  
+  .estado-completado {
+    background-color: #3b82f6; /* azul */
+  }
+  
+  .estado-cancelado {
+    background-color: #ef4444; /* rojo */
+  }
+  
+  .postulacion-body p {
+    margin: 0.3rem 0;
+    font-size: 0.95rem;
+    color: #444;
+  }
+  
+  .empty-state {
+    text-align: center;
+    margin-top: 3rem;
+    color: #777;
+    font-size: 1.1rem;
+  }
+  
+  .empty-state button {
+    margin-top: 1rem;
+    padding: 0.5rem 1.25rem;
+    background-color: #2563eb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .empty-state button:hover {
+    background-color: #1e40af;
+  }
+  
+  .postulaciones-footer {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .btn {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #1e40af;
+  }
+  
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #4b5563;
+  }
+  
+  .loading-wrapper, .error-wrapper {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #555;
+  }
+  
+  .spinner {
+    margin: 1rem auto;
+    border: 6px solid #e5e7eb;
+    border-top: 6px solid #2563eb;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  

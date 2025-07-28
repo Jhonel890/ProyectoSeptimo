@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       as: "puntajes",
     });
 
-    // Relación 1 a muchos con oficio (a través de una tabla intermedia)
+    // Relación muchos a muchos con oficio (a través de una tabla intermedia)
     persona.belongsToMany(models.oficio, {
       through: "persona_oficio", 
       foreignKey: "id_persona", 
