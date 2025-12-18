@@ -8,7 +8,7 @@ on:
 
 jobs:
   dast:
-    name: Escaneo OWASP ZAP (Manual Docker)
+    name: Escaneo OWASP ZAP (Docker Root)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,32 +24,37 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Iniciar la aplicación y esperar
+        # Importante: Definimos las variables de entorno que aparecen en tu PDF (Fig. 9)
+        env:
+          PORT: 3000
         run: |
-          # Damos permisos totales para evitar problemas de escritura del reporte
-          sudo chmod -R 777 .
-          
-          # Iniciamos la app
+          # Iniciamos la app en background
           npm run build --if-present
           npm start &
           
-          # Esperamos al puerto 3000
+          # Esperamos a que el puerto 3000 responda
           echo "Esperando a que la aplicación inicie..."
           npx wait-on http://localhost:3000 -t 60000
 
-      - name: Descargar imagen de ZAP
+      - name: Verificar conexión (Debug)
+        # Este paso nos dirá si la app está viva antes de culpar a ZAP
+        run: |
+          echo "Probando conexión a la app..."
+          curl -v http://localhost:3000
+
+      - name: Descargar imagen ZAP
         run: docker pull ghcr.io/zaproxy/zaproxy:stable
 
-      - name: Ejecutar Escaneo ZAP Directo
+      - name: Ejecutar Escaneo ZAP (Como Root)
         run: |
-          # Ejecutamos Docker directamente
-          # -v $(pwd):/zap/wrk/:rw  -> Mapea la carpeta actual para guardar el reporte
-          # --network host          -> PERMITE que ZAP vea 'localhost:3000' directamente
-          # -t ... zap-baseline.py  -> Ejecuta el script de escaneo
+          # Explicación de los cambios para arreglar tu error:
+          # -u 0: Ejecuta como ROOT para tener permiso de escritura (Soluciona "No files found")
+          # --network host: Permite ver "localhost:3000" (Soluciona error de conexión)
+          # -v ${{ github.workspace }}:/zap/wrk/:rw : Mapea la carpeta correctamente
           
-          docker run -v $(pwd):/zap/wrk/:rw \
-          --network host \
-          -t ghcr.io/zaproxy/zaproxy:stable \
-          zap-baseline.py -t http://localhost:3000 -r zap_report.html -I
+          docker run --rm --network host -u 0 -v ${{ github.workspace }}:/zap/wrk/:rw \
+          ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+          -t http://localhost:3000 -r zap_report.html -I
 
       - name: Guardar resultados ZAP
         if: always()
