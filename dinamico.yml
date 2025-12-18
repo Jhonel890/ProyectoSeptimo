@@ -1,0 +1,46 @@
+name: Análisis Dinámico (DAST)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    name: Escaneo OWASP ZAP
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v3
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Instalar dependencias
+      run: npm install # O npm install --legacy-peer-deps según tu proyecto
+
+    - name: Iniciar aplicación en segundo plano
+      run: |
+        npm run build --if-present
+        npm start & 
+        sleep 30 # Espera para asegurar que el servidor inicie (ajusta según necesites)
+
+    - name: Escaneo ZAP Baseline
+      uses: zaproxy/action-baseline@v0.9.0
+      continue-on-error: true
+      with:
+        target: 'http://localhost:3000' # Asegúrate que coincida con el puerto de tu app
+        fail_action: false
+        allow_issue_writing: false
+        artifact_name: zap_report
+
+    - name: Guardar resultados ZAP
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: zap_report
+        path: zap_report.html # O el formato que genere la acción
