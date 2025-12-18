@@ -8,7 +8,7 @@ on:
 
 jobs:
   dast:
-    name: Escaneo OWASP ZAP
+    name: Escaneo OWASP ZAP (Manual Docker)
     runs-on: ubuntu-latest
 
     steps:
@@ -25,29 +25,31 @@ jobs:
 
       - name: Iniciar la aplicación y esperar
         run: |
-          # Damos permisos totales a la carpeta para evitar error de escritura
+          # Damos permisos totales para evitar problemas de escritura del reporte
           sudo chmod -R 777 .
           
-          # Iniciamos la app en segundo plano
+          # Iniciamos la app
           npm run build --if-present
           npm start &
           
-          # Esperamos a que el puerto 3000 esté activo en el localhost del runner
+          # Esperamos al puerto 3000
           echo "Esperando a que la aplicación inicie..."
-          npx wait-on http://127.0.0.1:3000 -t 60000
+          npx wait-on http://localhost:3000 -t 60000
 
-      - name: Escaneo ZAP Baseline
-        uses: zaproxy/action-baseline@v0.12.0
-        continue-on-error: true
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'ghcr.io/zaproxy/zaproxy:stable'
-          # TRUCO: Usamos 172.17.0.1 para acceder al host desde Docker en Linux
-          target: 'http://172.17.0.1:3000'
-          fail_action: false
-          allow_issue_writing: false
-          # Forzamos el nombre del reporte para encontrarlo después
-          cmd_options: '-a -r zap_report.html'
+      - name: Descargar imagen de ZAP
+        run: docker pull ghcr.io/zaproxy/zaproxy:stable
+
+      - name: Ejecutar Escaneo ZAP Directo
+        run: |
+          # Ejecutamos Docker directamente
+          # -v $(pwd):/zap/wrk/:rw  -> Mapea la carpeta actual para guardar el reporte
+          # --network host          -> PERMITE que ZAP vea 'localhost:3000' directamente
+          # -t ... zap-baseline.py  -> Ejecuta el script de escaneo
+          
+          docker run -v $(pwd):/zap/wrk/:rw \
+          --network host \
+          -t ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py -t http://localhost:3000 -r zap_report.html -I
 
       - name: Guardar resultados ZAP
         if: always()
