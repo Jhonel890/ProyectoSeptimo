@@ -12,44 +12,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el código
       - name: Checkout del código
         uses: actions/checkout@v3
 
-      # 2. Configurar el entorno Node.js (según PDF)
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. Instalar dependencias (usamos legacy-peer-deps como sugiere la Fig. 9 del PDF)
       - name: Instalar dependencias
         run: npm install --legacy-peer-deps
 
-      # 4. Iniciar aplicación y ESPERAR a que esté lista (CORRECCIÓN)
-      # Esto soluciona el error 254: esperamos a que el puerto 3000 responda.
-      - name: Iniciar la aplicación en segundo plano
+      - name: Iniciar la aplicación y esperar
         run: |
           npm run build --if-present
           npm start &
           npx wait-on http://localhost:3000 -t 60000
 
-      # 5. Ejecutar el escaneo de ZAP
       - name: Escaneo ZAP Baseline
-        [cite_start]uses: zaproxy/action-baseline@v0.9.0 # Versión usada en la guía [cite: 541]
+        uses: zaproxy/action-baseline@v0.9.0
         continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'ghcr.io/zaproxy/zaproxy:stable'
-          target: 'http://localhost:3000' # Debe coincidir con el puerto de tu app
+          target: 'http://localhost:3000'
           fail_action: false
           allow_issue_writing: false
           artifact_name: zap_report
-          [cite_start]format: html # Formato definido en [cite: 554]
 
-      # 6. Subir el reporte generado
       - name: Guardar resultados ZAP
-        if: always() # "always()" asegura que se suba el reporte incluso si ZAP encuentra fallos
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap_report
