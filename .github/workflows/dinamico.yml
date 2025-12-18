@@ -25,33 +25,32 @@ jobs:
 
       - name: Iniciar la aplicación y esperar
         run: |
+          # Damos permisos totales a la carpeta para evitar error de escritura
+          sudo chmod -R 777 .
+          
+          # Iniciamos la app en segundo plano
           npm run build --if-present
-          # Iniciamos el servidor
           npm start &
-          # Esperamos a que el puerto 3000 responda
-          echo "Esperando conexión..."
+          
+          # Esperamos a que el puerto 3000 esté activo en el localhost del runner
+          echo "Esperando a que la aplicación inicie..."
           npx wait-on http://127.0.0.1:3000 -t 60000
-
-      # --- CORRECCIÓN CRÍTICA PARA EL ERROR 254 ---
-      - name: Dar permisos de escritura al workspace
-        run: chmod -R 777 .
-      # --------------------------------------------
 
       - name: Escaneo ZAP Baseline
         uses: zaproxy/action-baseline@v0.12.0
-        continue-on-error: true # Permite que el pipeline siga aunque encuentre fallos
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'ghcr.io/zaproxy/zaproxy:stable'
-          target: 'http://127.0.0.1:3000'
+          # TRUCO: Usamos 172.17.0.1 para acceder al host desde Docker en Linux
+          target: 'http://172.17.0.1:3000'
           fail_action: false
           allow_issue_writing: false
-          # -a: incluye reglas alfa/beta
-          # -r: obliga a guardar el reporte con este nombre específico
+          # Forzamos el nombre del reporte para encontrarlo después
           cmd_options: '-a -r zap_report.html'
 
       - name: Guardar resultados ZAP
-        if: always() # Se ejecuta aunque ZAP detecte vulnerabilidades
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap_report
